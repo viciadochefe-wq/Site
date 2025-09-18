@@ -91,11 +91,11 @@ async function initializeDataFiles() {
       emailPass: '',
       emailFrom: '',
       wasabiConfig: {
-        accessKey: '',
-        secretKey: '',
-        region: 'eu-central-2',
-        bucket: 'videosfolder',
-        endpoint: 'https://s3.eu-central-2.wasabisys.com'
+        accessKey: process.env.VITE_WASABI_ACCESS_KEY || '',
+        secretKey: process.env.VITE_WASABI_SECRET_KEY || '',
+        region: process.env.VITE_WASABI_REGION || '',
+        bucket: process.env.VITE_WASABI_BUCKET || '',
+        endpoint: process.env.VITE_WASABI_ENDPOINT || ''
       }
     }}
   ];
@@ -272,7 +272,7 @@ async function startServer() {
               console.log('Dados iniciais incluídos:');
               console.log('- Usuário admin: admin@gmail.com / admin123');
               console.log('- Configuração do site: VideosPlus');
-              console.log('- Configuração Wasabi: videosfolder');
+              console.log('- Configuração Wasabi:', process.env.VITE_WASABI_BUCKET || 'não configurado');
             } else {
               console.log('Erro ao criar arquivo JSON inicial no Wasabi');
             }
