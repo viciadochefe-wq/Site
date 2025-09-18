@@ -167,11 +167,11 @@ async function startServer() {
         emailPass: '',
         emailFrom: '',
         wasabiConfig: {
-          accessKey: process.env.WASABI_ACCESS_KEY || '',
-          secretKey: process.env.WASABI_SECRET_KEY || '',
-          region: process.env.WASABI_REGION || '',
-          bucket: process.env.WASABI_BUCKET || '',
-          endpoint: process.env.WASABI_ENDPOINT || ''
+          accessKey: process.env.VITE_WASABI_ACCESS_KEY || '',
+          secretKey: process.env.VITE_WASABI_SECRET_KEY || '',
+          region: process.env.VITE_WASABI_REGION || '',
+          bucket: process.env.VITE_WASABI_BUCKET || '',
+          endpoint: process.env.VITE_WASABI_ENDPOINT || ''
         }
       };
       await sqliteDatabaseService.updateSiteConfig(defaultConfig);
@@ -248,11 +248,11 @@ async function startServer() {
                 emailPass: '',
                 emailFrom: '',
               wasabiConfig: {
-                accessKey: process.env.WASABI_ACCESS_KEY || '',
-                secretKey: process.env.WASABI_SECRET_KEY || '',
-                region: process.env.WASABI_REGION || '',
-                bucket: process.env.WASABI_BUCKET || '',
-                endpoint: process.env.WASABI_ENDPOINT || ''
+                accessKey: process.env.VITE_WASABI_ACCESS_KEY || '',
+                secretKey: process.env.VITE_WASABI_SECRET_KEY || '',
+                region: process.env.VITE_WASABI_REGION || '',
+                bucket: process.env.VITE_WASABI_BUCKET || '',
+                endpoint: process.env.VITE_WASABI_ENDPOINT || ''
               }
               }
             };
