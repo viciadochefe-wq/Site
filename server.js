@@ -167,11 +167,11 @@ async function startServer() {
         emailPass: '',
         emailFrom: '',
         wasabiConfig: {
-          accessKey: '03AFIL7RED0GENX84KDT',
-          secretKey: 'XMrGmC2R25GRTASbUssLkjz5Zr8UsfeyZ9zVgbGy',
-          region: 'eu-central-2',
-          bucket: 'videosfolder',
-          endpoint: 'https://s3.eu-central-2.wasabisys.com'
+          accessKey: process.env.WASABI_ACCESS_KEY || '',
+          secretKey: process.env.WASABI_SECRET_KEY || '',
+          region: process.env.WASABI_REGION || '',
+          bucket: process.env.WASABI_BUCKET || '',
+          endpoint: process.env.WASABI_ENDPOINT || ''
         }
       };
       await sqliteDatabaseService.updateSiteConfig(defaultConfig);
@@ -247,13 +247,13 @@ async function startServer() {
                 emailUser: '',
                 emailPass: '',
                 emailFrom: '',
-                wasabiConfig: {
-                  accessKey: '03AFIL7RED0GENX84KDT',
-                  secretKey: 'XMrGmC2R25GRTASbUssLkjz5Zr8UsfeyZ9zVgbGy',
-                  region: 'eu-central-2',
-                  bucket: 'videosfolder',
-                  endpoint: 'https://s3.eu-central-2.wasabisys.com'
-                }
+              wasabiConfig: {
+                accessKey: process.env.WASABI_ACCESS_KEY || '',
+                secretKey: process.env.WASABI_SECRET_KEY || '',
+                region: process.env.WASABI_REGION || '',
+                bucket: process.env.WASABI_BUCKET || '',
+                endpoint: process.env.WASABI_ENDPOINT || ''
+              }
               }
             };
 
