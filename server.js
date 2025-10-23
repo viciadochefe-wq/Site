@@ -17,9 +17,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://videosplus.onrender.com', 'https://videosplus.vercel.app']
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: true, // Allow any origin
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
