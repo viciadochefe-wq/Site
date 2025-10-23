@@ -14,6 +14,20 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
+// Middleware CORS específico para todas as rotas da API
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Responder a requisições OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
 // Configurar multer para upload de arquivos
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -541,6 +555,16 @@ router.put('/site-config', async (req, res) => {
 
 // Criar sessão de checkout do Stripe
 router.post('/create-checkout-session', async (req, res) => {
+  // Adicionar headers CORS manualmente
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Responder a requisições OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   try {
     const { amount, currency = 'usd', name, success_url, cancel_url } = req.body;
     
