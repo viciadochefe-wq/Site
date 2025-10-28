@@ -16,9 +16,22 @@ const router = express.Router();
 
 // Middleware CORS específico para todas as rotas da API
 router.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  
+  // Permitir todos os domínios Render
+  if (origin && origin.includes('.onrender.com')) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+    // Permitir localhost para desenvolvimento
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    // Permitir qualquer origem como fallback
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
   // Responder a requisições OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
@@ -573,7 +586,37 @@ router.post('/create-checkout-session', async (req, res) => {
     }
 
     const siteConfig = await sqliteDatabaseService.getSiteConfig();
-    const stripeSecretKey = siteConfig.stripeSecretKey;
+    let stripeSecretKey = siteConfig?.stripeSecretKey;
+
+    // Fallback: buscar chave do Stripe nos metadados do Wasabi se não estiver configurada no SQLite
+    if (!stripeSecretKey) {
+      try {
+        const wasabiConfig = siteConfig?.wasabiConfig;
+        if (wasabiConfig && wasabiConfig.accessKey && wasabiConfig.secretKey && wasabiConfig.bucket) {
+          const s3Client = new S3Client({
+            region: wasabiConfig.region,
+            endpoint: wasabiConfig.endpoint,
+            credentials: {
+              accessKeyId: wasabiConfig.accessKey,
+              secretAccessKey: wasabiConfig.secretKey,
+            },
+            forcePathStyle: true,
+          });
+
+          const getConfigObject = new GetObjectCommand({
+            Bucket: wasabiConfig.bucket,
+            Key: 'metadata/videosplus-data.json',
+          });
+
+          const obj = await s3Client.send(getConfigObject);
+          const text = await obj.Body.transformToString();
+          const metadataJson = JSON.parse(text);
+          stripeSecretKey = metadataJson?.siteConfig?.stripeSecretKey || '';
+        }
+      } catch (fallbackError) {
+        console.warn('Fallback to Wasabi metadata failed:', fallbackError.message);
+      }
+    }
 
     if (!stripeSecretKey) {
       return res.status(500).json({ error: 'Stripe secret key not configured' });
