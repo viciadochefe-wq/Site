@@ -624,9 +624,9 @@ const VideoPlayer: FC = () => {
       const randomProductName = getRandomProductName();
       setPurchasedProductName(randomProductName);
       
-      // Build success and cancel URLs
-      const successUrl = `${window.location.origin}/video/${id}?payment_success=true&session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${window.location.origin}/video/${id}?payment_canceled=true`;
+      // Build success and cancel URLs (hash routing)
+      const successUrl = `${window.location.origin}/#/video/${id}?payment_success=true&session_id={CHECKOUT_SESSION_ID}`;
+      const cancelUrl = `${window.location.origin}/#/video/${id}?payment_canceled=true`;
       
       // Create checkout session
       const sessionId = await StripeService.createCheckoutSession(
