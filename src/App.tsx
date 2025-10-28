@@ -12,6 +12,7 @@ import VideoPage from './pages/VideoPage';
 import Videoplayer from './pages/Videoplayer';
 import Admin from './pages/Admin';
 import Home from './pages/Home';
+import PaymentSuccess from './pages/PaymentSuccess';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -97,6 +98,9 @@ const AppContent: FC = () => {
           {/* Video pages */}
           <Route path="/video/:id" element={<Videoplayer />} />
           <Route path="/video/legacy/:id" element={<VideoPage />} />
+          
+          {/* Payment Success */}
+          <Route path="/payment-success/:id" element={<PaymentSuccess />} />
           
           {/* Authentication */}
           <Route path="/login" element={<Login />} />

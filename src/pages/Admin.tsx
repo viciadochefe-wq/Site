@@ -60,6 +60,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
 import SecurityIcon from '@mui/icons-material/Security';
+import CryptoJS from 'crypto-js';
 
 // Tab panel component
 interface TabPanelProps {
@@ -894,6 +895,190 @@ const Admin: FC = () => {
         
         {/* Site Configuration & Users Tab */}
         <TabPanel value={tabValue} index={1}>
+          {/* Users Management Section */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" component="h3" sx={{ mb: 2 }}>
+              User Management
+            </Typography>
+            
+            {loading && !error ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      setNewUser(!newUser);
+                      setUserName('');
+                      setUserEmail('');
+                      setUserPassword('');
+                      setEditingUser(null);
+                    }}
+                  >
+                    Add New User
+                  </Button>
+                </Box>
+
+                {/* User Form */}
+                {newUser && (
+                  <Paper sx={{ p: 2, mb: 2, bgcolor: 'background.default' }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                      Create New User
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Name"
+                          value={userName}
+                          onChange={(e) => setUserName(e.target.value)}
+                          variant="outlined"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          type="email"
+                          value={userEmail}
+                          onChange={(e) => setUserEmail(e.target.value)}
+                          variant="outlined"
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Password"
+                          type="password"
+                          value={userPassword}
+                          onChange={(e) => setUserPassword(e.target.value)}
+                          variant="outlined"
+                        />
+                      </Grid>
+                    </Grid>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={async () => {
+                          try {
+                            setLoading(true);
+                            const hashedPassword = await hashPassword(userPassword);
+                            const newUserData = {
+                              name: userName,
+                              email: userEmail,
+                              password: hashedPassword
+                            };
+                            await jsonDatabaseService.createUser(newUserData);
+                            showFeedback('User created successfully!', 'success');
+                            fetchUsers();
+                            setNewUser(false);
+                            setUserName('');
+                            setUserEmail('');
+                            setUserPassword('');
+                          } catch (err) {
+                            console.error('Error creating user:', err);
+                            showFeedback('Failed to create user', 'error');
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={!userName || !userEmail || !userPassword}
+                      >
+                        Create User
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setNewUser(false);
+                          setUserName('');
+                          setUserEmail('');
+                          setUserPassword('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  </Paper>
+                )}
+
+                {/* Users Table */}
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Email</TableCell>
+                        <TableCell>Created</TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {users.map((usr) => (
+                        <TableRow key={usr.$id}>
+                          <TableCell>{usr.name}</TableCell>
+                          <TableCell>{usr.email}</TableCell>
+                          <TableCell>{new Date(usr.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <IconButton 
+                              color="primary" 
+                              onClick={async () => {
+                                const newPassword = prompt('Enter new password for ' + usr.name);
+                                if (newPassword && newPassword.length >= 6) {
+                                  try {
+                                    setLoading(true);
+                                    const hashedPassword = await hashPassword(newPassword);
+                                    await jsonDatabaseService.updateUser(usr.$id, { password: hashedPassword });
+                                    showFeedback('Password updated successfully!', 'success');
+                                  } catch (err) {
+                                    console.error('Error updating password:', err);
+                                    showFeedback('Failed to update password', 'error');
+                                  } finally {
+                                    setLoading(false);
+                                  }
+                                } else if (newPassword) {
+                                  showFeedback('Password must be at least 6 characters', 'error');
+                                }
+                              }}
+                              aria-label="change password"
+                              size="small"
+                              sx={{ mr: 1 }}
+                            >
+                              <SecurityIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton 
+                              color="error" 
+                              onClick={() => {
+                                setItemToDelete({ type: 'user', id: usr.$id });
+                                setDeleteDialogOpen(true);
+                              }}
+                              aria-label="delete user"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {users.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={4} align="center">
+                            No users found
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+          </Paper>
+
+          {/* Site Configuration Section */}
           <Box sx={{ mb: 4 }}>
             <Grid container spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
               <Grid item>
@@ -1333,4 +1518,9 @@ function showFeedback(message: string, severity: 'success' | 'error') {
     detail: { message, severity }
   });
   document.dispatchEvent(event);
+}
+
+// Helper function to hash password
+async function hashPassword(password: string): Promise<string> {
+  return CryptoJS.SHA256(password).toString();
 }
