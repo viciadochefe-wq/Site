@@ -666,20 +666,12 @@ const VideoPlayer: FC = () => {
     const sessionId = queryParams.get('session_id');
     
     if (paymentSuccess === 'true' && video) {
-      // Update state to show purchase was successful
-      setHasPurchased(true);
-      setPurchaseComplete(true);
-      setShowPurchaseModal(true);
-      
-      // Store the purchase in session storage
+      // Store purchase information
+      const productName = getRandomProductName();
       sessionStorage.setItem(`purchased_${video.$id}`, 'true');
+      sessionStorage.setItem(`product_name_${video.$id}`, productName);
       
-      // Set a random product name if not already set
-      if (!purchasedProductName) {
-        setPurchasedProductName(getRandomProductName());
-      }
-      
-      // Send Telegram notification for Stripe payment (same as PayPal)
+      // Send Telegram notification for Stripe payment
       if (sessionId) {
         TelegramService.sendSaleNotification({
           videoTitle: video.title,
@@ -694,10 +686,12 @@ const VideoPlayer: FC = () => {
         });
       }
       
-      // Clear query params
-      window.history.replaceState({}, document.title, `/video/${id}`);
+      // Redirect to payment success page
+      setTimeout(() => {
+        navigate(`/#/payment-success/${id}`);
+      }, 500);
     }
-  }, [id, video, purchasedProductName]);
+  }, [id, video, navigate]);
 
   if (loading) {
     return (
